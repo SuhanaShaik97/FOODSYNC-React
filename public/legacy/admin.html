@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOODSYNC — Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .admin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:22px 0 30px}
+    .admin-stat{padding:20px}.admin-stat span{display:block;color:var(--muted);font-size:13px}.admin-stat strong{display:block;margin-top:7px;font:600 28px 'Fraunces',serif;color:var(--plum)}
+    .admin-section{margin:24px 0}.admin-section h2{font-size:22px;margin-bottom:12px;color:var(--plum)}
+    .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px}
+    table{width:100%;border-collapse:collapse;min-width:620px}th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px}th{color:var(--plum);background:#f8f6f0}tr:last-child td{border-bottom:0}
+    .admin-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    @media(max-width:760px){.admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <header class="topnav"><div class="container"><div class="brand">FOODSYNC<span>.</span><span class="role-tag">Admin</span></div><div class="nav-right"><span id="adminName"></span><button class="btn-ghost" onclick="logout()">Log out</button></div></div></header>
+  <main class="container" style="padding-top:32px;padding-bottom:50px">
+    <div class="admin-intro"><div><h1 class="section-title">Platform overview</h1><p class="section-sub" style="margin-bottom:0">Monitor FOODSYNC users, restaurants and orders from one dashboard.</p></div><button class="btn btn-outline btn-small" onclick="renderAdmin()">Refresh data</button></div>
+    <div class="admin-grid">
+      <div class="card admin-stat"><span>Total users</span><strong id="totalUsers">0</strong></div>
+      <div class="card admin-stat"><span>Restaurants</span><strong id="totalRestaurants">0</strong></div>
+      <div class="card admin-stat"><span>Total orders</span><strong id="totalOrders">0</strong></div>
+      <div class="card admin-stat"><span>Delivered orders</span><strong id="deliveredOrders">0</strong></div>
+    </div>
+    <section class="admin-section"><h2>Users</h2><div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Restaurant</th></tr></thead><tbody id="usersBody"></tbody></table></div></section>
+    <section class="admin-section"><h2>Restaurants</h2><div class="table-wrap"><table><thead><tr><th>Restaurant</th><th>Menu items</th><th>Manager</th></tr></thead><tbody id="restaurantsBody"></tbody></table></div></section>
+    <section class="admin-section"><h2>All orders</h2><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Restaurant</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></section>
+  </main>
+  <script src="js/data.js"></script><script src="js/admin.js"></script>
+</body></html>
