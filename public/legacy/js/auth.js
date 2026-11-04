@@ -1,3 +1,4 @@
+
 /* ============================================================
    auth.js — role-tabbed login + signup, backed by DB (data.js)
    ============================================================ */
@@ -23,7 +24,7 @@ const ROLE_META = {
     label: "Admin",
     loginTitle: "Admin sign in",
     loginSub: "Oversee users, restaurants and every order on FOODSYNC.",
-    signupSub: "Admin accounts are created by the platform owner.",
+    signupSub: "Create your FOODSYNC administrator account.",
     redirect: "admin.html",
     demo: "admin@foodsync.com",
   },
@@ -53,26 +54,51 @@ const signupRestaurant = document.getElementById("signupRestaurant");
 
 function applyRole(role) {
   currentRole = role;
+
   document.querySelectorAll(".role-tab").forEach((t) =>
     t.classList.toggle("active", t.dataset.role === role)
   );
+
   const meta = ROLE_META[role];
+
   loginTitle.textContent = meta.loginTitle;
   loginSub.textContent = meta.loginSub;
   signupSub.textContent = meta.signupSub;
+
   managerRestaurantField.classList.toggle("hidden", role !== "manager");
+
+  // Show Create Account option for ALL roles, including Admin
   const signupLink = document.querySelector(".switch-line");
-  if (signupLink) signupLink.classList.toggle("hidden", role === "admin");
-  if (role === "admin") { signupForm.classList.add("hidden"); loginForm.classList.remove("hidden"); }
-  if (role === "manager") {
-    signupRestaurant.innerHTML = DB.getRestaurants().map(r => `<option value="${r}">${r}</option>`).join("");
+  if (signupLink) {
+    signupLink.classList.remove("hidden");
   }
+
+  // Show login form whenever a role is selected
+  loginForm.classList.remove("hidden");
+  signupForm.classList.add("hidden");
+
   if (role === "manager") {
-    const demos = DB.getUsers().filter(u => u.role === "manager" && u.email.endsWith("@demo.com"));
-    demoHint.innerHTML = `Demo manager logins — ` + demos.map(u => `<code>${u.email}</code> (${u.restaurant})`).join(" · ") + ` · password: <code>demo123</code>`;
+    signupRestaurant.innerHTML = DB.getRestaurants()
+      .map((r) => `<option value="${r}">${r}</option>`)
+      .join("");
+  }
+
+  if (role === "manager") {
+    const demos = DB.getUsers().filter(
+      (u) => u.role === "manager" && u.email.endsWith("@demo.com")
+    );
+
+    demoHint.innerHTML =
+      `Demo manager logins — ` +
+      demos
+        .map((u) => `<code>${u.email}</code> (${u.restaurant})`)
+        .join(" · ") +
+      ` · password: <code>demo123</code>`;
   } else {
-    demoHint.innerHTML = `Demo login — email: <code>${meta.demo}</code>, password: <code>demo123</code>`;
+    demoHint.innerHTML =
+      `Demo login — email: <code>${meta.demo}</code>, password: <code>demo123</code>`;
   }
+
   loginError.classList.remove("show");
   signupError.classList.remove("show");
 }
@@ -80,29 +106,37 @@ function applyRole(role) {
 roleTabs.addEventListener("click", (e) => {
   const btn = e.target.closest(".role-tab");
   if (!btn) return;
+
   applyRole(btn.dataset.role);
 });
 
 document.getElementById("showSignup").addEventListener("click", (e) => {
   e.preventDefault();
+
   loginForm.classList.add("hidden");
   signupForm.classList.remove("hidden");
 });
 
 document.getElementById("showLogin").addEventListener("click", (e) => {
   e.preventDefault();
+
   signupForm.classList.add("hidden");
   loginForm.classList.remove("hidden");
 });
 
+// LOGIN
 loginForm.addEventListener("submit", (e) => {
   e.preventDefault();
+
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
 
   const user = DB.findUser(email, currentRole);
+
   if (!user || user.password !== password) {
-    loginError.textContent = "We couldn't find an account with that email, password and role. Check your details and try again.";
+    loginError.textContent =
+      "We couldn't find an account with that email, password and role. Check your details and try again.";
+
     loginError.classList.add("show");
     return;
   }
@@ -111,9 +145,10 @@ loginForm.addEventListener("submit", (e) => {
   window.location.href = ROLE_META[currentRole].redirect;
 });
 
+// SIGNUP — works for Customer, Manager, Admin and Delivery Partner
 signupForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  if (currentRole === "admin") return;
+
   const name = document.getElementById("signupName").value.trim();
   const email = document.getElementById("signupEmail").value.trim();
   const password = document.getElementById("signupPassword").value;
@@ -125,17 +160,29 @@ signupForm.addEventListener("submit", (e) => {
   }
 
   if (DB.findUser(email, currentRole)) {
-    signupError.textContent = "An account with this email already exists for this role. Try signing in instead.";
+    signupError.textContent =
+      "An account with this email already exists for this role. Try signing in instead.";
+
     signupError.classList.add("show");
     return;
   }
 
-  const user = { name, email, password, role: currentRole };
-  if (currentRole === "manager") user.restaurant = signupRestaurant.value;
+  const user = {
+    name,
+    email,
+    password,
+    role: currentRole
+  };
+
+  if (currentRole === "manager") {
+    user.restaurant = signupRestaurant.value;
+  }
+
   DB.addUser(user);
   DB.setSession(user);
+
   window.location.href = ROLE_META[currentRole].redirect;
 });
 
+// Default role
 applyRole("customer");
-
